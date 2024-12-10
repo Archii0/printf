@@ -1,5 +1,6 @@
 # printf
 Recreating printf for fun
+
 It supports:
 - %s (string)
 - %c (char)
