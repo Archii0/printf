@@ -1,8 +1,8 @@
+#include "malloc2.h"
 #include <stdarg.h>
-#include <unistd.h> // for system calls
-// #include "x86args.h"
 
 #define putchar2(x) write(1, chardup2(x), 1)
+#define swapchar(x) (x + 0x30)
 
 #define Wait4char 1 // 00 01
 #define Wait4fmt 2  // 00 10
@@ -39,6 +39,34 @@ int puts2(const char *str) {
 
     // 0 is stdin, 1 is stdout, 2 is stderr
     return write(1, str, n);
+}
+
+char *itoa2(int n) {
+    unsigned int x, y;
+    unsigned char *xs, *p;
+    static char ret[10];
+
+    y = n;
+    xs = malloc2(10);
+    p = xs;
+
+    while (y > 9) {
+        x = y;
+        y = x / 10;
+        *xs++ = x % 10;
+    }
+
+    *xs = y;
+
+    for (x = 0; xs > p; ++x, --xs) {
+        ret[x] = swapchar(*xs);
+    }
+    ret[x] = swapchar(*xs);
+    ret[++x] = 0;
+
+    freeall();
+
+    return ret;
 }
 
 int printf2(const char *fmt, ...) {
@@ -81,6 +109,11 @@ int printf2(const char *fmt, ...) {
                 putchar2(c);
                 s = Wait4char;
                 break;
+            case 'd':
+                int x = va_arg(args, int);
+                puts2(itoa2(x));
+                s = Wait4char;
+                break;
             default:
                 s = Wait4char;
                 va_arg(args, void *); // Skip the argument by consuming it
@@ -98,6 +131,6 @@ int main() {
 
     p = "Archie";
     c = 'x';
-    printf2("Hello %c abc\n", c);
+    printf2("Hello %d and %s abc\n", 500, p);
     return 0;
 }
